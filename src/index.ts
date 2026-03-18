@@ -9,6 +9,7 @@ import { registerHrTools } from './tools/hr-tools.js';
 import { registerAccountsTools } from './tools/accounts-tools.js';
 import { registerPayrollTools } from './tools/payroll-tools.js';
 import { registerGenericTools } from './tools/generic-tools.js';
+import { registerTodoTools } from './tools/todo-tools.js';
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -35,6 +36,7 @@ async function main(): Promise<void> {
   registerAccountsTools(server, client);
   registerPayrollTools(server, client);
   registerGenericTools(server, client);
+  registerTodoTools(server, client);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

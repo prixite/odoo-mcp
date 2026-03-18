@@ -1,6 +1,6 @@
 # odoo-mcp
 
-An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server for [Odoo](https://www.odoo.com), enabling AI agents (Claude, etc.) to interact with Odoo ERP — CRM, Sales, HR, Accounts, and Payroll — via natural language.
+An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server for [Odoo](https://www.odoo.com), enabling AI agents (Claude, etc.) to interact with Odoo ERP — CRM, Sales, HR, Accounts, Payroll, and To-dos — via natural language.
 
 ## Features
 
@@ -9,6 +9,7 @@ An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server for [O
 - **HR** — list employees/departments, search employees, leave allocations and balances
 - **Accounts** — invoices, accounts receivable/payable summaries, revenue reports
 - **Payroll** — payslips, payroll batches, salary summaries
+- **To-do** — list, create, update, and complete personal to-do tasks
 - **Generic** — `search_read` and `get_record` for any Odoo model
 
 ## Tools
@@ -56,6 +57,15 @@ An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server for [O
 | `odoo_payroll_get_payslip` | Get full details of a payslip by ID |
 | `odoo_payroll_list_batches` | List payroll batches |
 | `odoo_payroll_salary_summary` | Salary summary grouped by department |
+
+### To-do
+| Tool | Description |
+|------|-------------|
+| `odoo_todo_list` | List personal to-dos with optional state and priority filters |
+| `odoo_todo_get` | Get full details of a to-do by ID |
+| `odoo_todo_create` | Create a new to-do (title, notes, deadline, priority) |
+| `odoo_todo_update` | Update title, notes, deadline, or priority of a to-do |
+| `odoo_todo_mark_done` | Mark a to-do as done or reopen it |
 
 ### Generic
 | Tool | Description |
