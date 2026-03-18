@@ -3,10 +3,20 @@ import { z } from 'zod';
 import type { OdooClient, OdooDomain } from '../odoo-client.js';
 
 const PAYSLIP_FIELDS = [
-  'id', 'name', 'employee_id', 'department_id', 'job_id',
-  'date_from', 'date_to', 'state',
-  'net_wage', 'gross_wage', 'basic_wage',
-  'company_id', 'struct_id', 'payslip_run_id',
+  'id',
+  'name',
+  'employee_id',
+  'department_id',
+  'job_id',
+  'date_from',
+  'date_to',
+  'state',
+  'net_wage',
+  'gross_wage',
+  'basic_wage',
+  'company_id',
+  'struct_id',
+  'payslip_run_id',
 ];
 
 export function registerPayrollTools(server: McpServer, client: OdooClient): void {
@@ -15,7 +25,9 @@ export function registerPayrollTools(server: McpServer, client: OdooClient): voi
     'List payslips with optional filters',
     {
       employee: z.string().optional().describe('Filter by employee name (partial match)'),
-      state: z.enum(['draft', 'verify', 'done', 'cancel']).optional()
+      state: z
+        .enum(['draft', 'verify', 'done', 'cancel'])
+        .optional()
         .describe('draft=draft, verify=waiting, done=paid, cancel=refused'),
       date_from: z.string().optional().describe('Payslip period from (YYYY-MM-DD)'),
       date_to: z.string().optional().describe('Payslip period to (YYYY-MM-DD)'),
@@ -53,7 +65,14 @@ export function registerPayrollTools(server: McpServer, client: OdooClient): voi
       const lineIds = payslip['line_ids'] as number[];
       const lines = lineIds?.length
         ? await client.read('hr.payslip.line', lineIds, [
-            'id', 'name', 'code', 'category_id', 'amount', 'quantity', 'rate', 'total',
+            'id',
+            'name',
+            'code',
+            'category_id',
+            'amount',
+            'quantity',
+            'rate',
+            'total',
           ])
         : [];
 
@@ -114,7 +133,7 @@ export function registerPayrollTools(server: McpServer, client: OdooClient): voi
       // Group by department
       const byDept: Record<string, { count: number; net: number; gross: number }> = {};
       for (const p of payslips) {
-        const dept = (p['department_id'] as [number, string] | false);
+        const dept = p['department_id'] as [number, string] | false;
         const deptName = dept ? dept[1] : 'No Department';
         if (!byDept[deptName]) byDept[deptName] = { count: 0, net: 0, gross: 0 };
         byDept[deptName].count++;
@@ -123,16 +142,22 @@ export function registerPayrollTools(server: McpServer, client: OdooClient): voi
       }
 
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            period: { date_from, date_to },
-            total_employees: payslips.length,
-            total_net_wage: totalNet,
-            total_gross_wage: totalGross,
-            by_department: byDept,
-          }, null, 2),
-        }],
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                period: { date_from, date_to },
+                total_employees: payslips.length,
+                total_net_wage: totalNet,
+                total_gross_wage: totalGross,
+                by_department: byDept,
+              },
+              null,
+              2
+            ),
+          },
+        ],
       };
     }
   );

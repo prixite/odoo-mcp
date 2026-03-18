@@ -3,11 +3,27 @@ import { z } from 'zod';
 import type { OdooClient, OdooDomain } from '../odoo-client.js';
 
 const CRM_LEAD_FIELDS = [
-  'id', 'name', 'partner_id', 'stage_id', 'user_id', 'team_id',
-  'probability', 'expected_revenue', 'planned_revenue',
-  'priority', 'tag_ids', 'description', 'date_deadline',
-  'date_closed', 'active', 'email_from', 'phone', 'mobile',
-  'company_id', 'create_date', 'write_date',
+  'id',
+  'name',
+  'partner_id',
+  'stage_id',
+  'user_id',
+  'team_id',
+  'probability',
+  'expected_revenue',
+  'planned_revenue',
+  'priority',
+  'tag_ids',
+  'description',
+  'date_deadline',
+  'date_closed',
+  'active',
+  'email_from',
+  'phone',
+  'mobile',
+  'company_id',
+  'create_date',
+  'write_date',
 ];
 
 export function registerCrmTools(server: McpServer, client: OdooClient): void {
@@ -67,7 +83,8 @@ export function registerCrmTools(server: McpServer, client: OdooClient): void {
     },
     async ({ query, limit }) => {
       const domain: OdooDomain = [
-        '|', '|',
+        '|',
+        '|',
         ['name', 'ilike', query],
         ['partner_id.name', 'ilike', query],
         ['email_from', 'ilike', query],
@@ -107,7 +124,10 @@ export function registerCrmTools(server: McpServer, client: OdooClient): void {
 
           const leads = await client.searchRead(
             'crm.lead',
-            [['stage_id', '=', stage['id'] as number], ['active', '=', true]],
+            [
+              ['stage_id', '=', stage['id'] as number],
+              ['active', '=', true],
+            ],
             ['expected_revenue'],
             { limit: 500 }
           );
@@ -136,7 +156,10 @@ export function registerCrmTools(server: McpServer, client: OdooClient): void {
     'Create a new CRM lead/opportunity',
     {
       name: z.string().describe('Lead title'),
-      partner_name: z.string().optional().describe('Contact/company name (if not an existing partner)'),
+      partner_name: z
+        .string()
+        .optional()
+        .describe('Contact/company name (if not an existing partner)'),
       email: z.string().optional().describe('Contact email'),
       phone: z.string().optional().describe('Contact phone'),
       expected_revenue: z.number().optional().describe('Expected revenue amount'),

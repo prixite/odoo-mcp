@@ -6,9 +6,18 @@ import type { OdooClient, OdooDomain, OdooValue } from '../odoo-client.js';
 const TODO_MODEL = 'project.task';
 
 const TODO_FIELDS = [
-  'id', 'name', 'description', 'date_deadline', 'priority',
-  'state', 'active', 'user_ids', 'tag_ids',
-  'create_date', 'write_date', 'date_last_stage_update',
+  'id',
+  'name',
+  'description',
+  'date_deadline',
+  'priority',
+  'state',
+  'active',
+  'user_ids',
+  'tag_ids',
+  'create_date',
+  'write_date',
+  'date_last_stage_update',
 ];
 
 function todoDomain(extra: OdooDomain = []): OdooDomain {
@@ -20,7 +29,10 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
     'odoo_todo_list',
     'List personal to-do tasks (no project assigned)',
     {
-      state: z.enum(['open', 'done']).optional().describe('"open" for pending, "done" for completed'),
+      state: z
+        .enum(['open', 'done'])
+        .optional()
+        .describe('"open" for pending, "done" for completed'),
       priority: z.enum(['0', '1']).optional().describe('"1" = starred/high priority, "0" = normal'),
       limit: z.number().optional().default(20),
       offset: z.number().optional().default(0),
@@ -87,7 +99,10 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
       description: z.string().optional().describe('New notes/details'),
       date_deadline: z.string().optional().describe('New due date in YYYY-MM-DD format'),
       priority: z.enum(['0', '1']).optional().describe('"1" = starred, "0" = normal'),
-      user_ids: z.array(z.number()).optional().describe('Replace assigned users with these user IDs'),
+      user_ids: z
+        .array(z.number())
+        .optional()
+        .describe('Replace assigned users with these user IDs'),
     },
     async ({ id, name, description, date_deadline, priority, user_ids }) => {
       const values: Record<string, OdooValue> = {};
@@ -113,7 +128,9 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
     },
     async ({ id, done }) => {
       await client.write(TODO_MODEL, [id], { state: done ? 'done' : 'open' });
-      return { content: [{ type: 'text', text: `To-do ${id} marked as ${done ? 'done' : 'open'}` }] };
+      return {
+        content: [{ type: 'text', text: `To-do ${id} marked as ${done ? 'done' : 'open'}` }],
+      };
     }
   );
 }

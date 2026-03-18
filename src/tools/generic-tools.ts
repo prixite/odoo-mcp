@@ -8,23 +8,28 @@ export function registerGenericTools(server: McpServer, client: OdooClient): voi
     'Generic Odoo search_read — query any model with a domain filter. Use this for ad-hoc queries not covered by dedicated tools.',
     {
       model: z.string().describe('Odoo model name, e.g. "res.partner", "account.move"'),
-      domain: z.array(z.any()).optional().default([]).describe(
-        'Odoo domain filter as JSON array, e.g. [["state","=","posted"]]'
-      ),
-      fields: z.array(z.string()).optional().default([]).describe(
-        'Fields to return. Empty array returns all fields (expensive — prefer specifying fields).'
-      ),
+      domain: z
+        .array(z.any())
+        .optional()
+        .default([])
+        .describe('Odoo domain filter as JSON array, e.g. [["state","=","posted"]]'),
+      fields: z
+        .array(z.string())
+        .optional()
+        .default([])
+        .describe(
+          'Fields to return. Empty array returns all fields (expensive — prefer specifying fields).'
+        ),
       limit: z.number().optional().default(20),
       offset: z.number().optional().default(0),
       order: z.string().optional().describe('Sort order, e.g. "name asc" or "create_date desc"'),
     },
     async ({ model, domain, fields, limit, offset, order }) => {
-      const records = await client.searchRead(
-        model,
-        (domain ?? []) as OdooDomain,
-        fields ?? [],
-        { limit, offset, order }
-      );
+      const records = await client.searchRead(model, (domain ?? []) as OdooDomain, fields ?? [], {
+        limit,
+        offset,
+        order,
+      });
 
       return {
         content: [{ type: 'text', text: JSON.stringify(records, null, 2) }],
@@ -73,8 +78,20 @@ export function registerGenericTools(server: McpServer, client: OdooClient): voi
       const partners = await client.searchRead(
         'res.partner',
         domain,
-        ['id', 'name', 'email', 'phone', 'mobile', 'is_company', 'company_name',
-         'customer_rank', 'supplier_rank', 'country_id', 'city', 'street'],
+        [
+          'id',
+          'name',
+          'email',
+          'phone',
+          'mobile',
+          'is_company',
+          'company_name',
+          'customer_rank',
+          'supplier_rank',
+          'country_id',
+          'city',
+          'street',
+        ],
         { limit, order: 'name asc' }
       );
 
@@ -91,7 +108,13 @@ export function registerGenericTools(server: McpServer, client: OdooClient): voi
       model: z.string().describe('Odoo model name, e.g. "crm.lead"'),
     },
     async ({ model }) => {
-      const fields = await client.fieldsGet(model, ['string', 'type', 'required', 'readonly', 'relation']);
+      const fields = await client.fieldsGet(model, [
+        'string',
+        'type',
+        'required',
+        'readonly',
+        'relation',
+      ]);
       return {
         content: [{ type: 'text', text: JSON.stringify(fields, null, 2) }],
       };

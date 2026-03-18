@@ -8,9 +8,7 @@ export type OdooValue =
   | OdooValue[]
   | { [key: string]: OdooValue };
 
-export type OdooDomain = Array<
-  [string, string, OdooValue] | '&' | '|' | '!'
->;
+export type OdooDomain = Array<[string, string, OdooValue] | '&' | '|' | '!'>;
 
 export interface OdooRecord {
   id: number;
@@ -77,11 +75,7 @@ export class OdooClient {
     return json.result as OdooValue;
   }
 
-  private async rpc(
-    endpoint: string,
-    method: string,
-    args: OdooValue[]
-  ): Promise<OdooValue> {
+  private async rpc(endpoint: string, method: string, args: OdooValue[]): Promise<OdooValue> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -162,11 +156,7 @@ export class OdooClient {
     return result as OdooRecord[];
   }
 
-  async read(
-    model: string,
-    ids: number[],
-    fields: string[]
-  ): Promise<OdooRecord[]> {
+  async read(model: string, ids: number[], fields: string[]): Promise<OdooRecord[]> {
     if (!this.uid) throw new Error('Not authenticated');
 
     const result = await this.rpc('object', 'execute_kw', [
@@ -197,10 +187,7 @@ export class OdooClient {
     return result as number;
   }
 
-  async create(
-    model: string,
-    values: Record<string, OdooValue>
-  ): Promise<number> {
+  async create(model: string, values: Record<string, OdooValue>): Promise<number> {
     if (!this.uid) throw new Error('Not authenticated');
 
     const result = await this.rpc('object', 'execute_kw', [
@@ -215,11 +202,7 @@ export class OdooClient {
     return result as number;
   }
 
-  async write(
-    model: string,
-    ids: number[],
-    values: Record<string, OdooValue>
-  ): Promise<boolean> {
+  async write(model: string, ids: number[], values: Record<string, OdooValue>): Promise<boolean> {
     if (!this.uid) throw new Error('Not authenticated');
 
     const result = await this.rpc('object', 'execute_kw', [

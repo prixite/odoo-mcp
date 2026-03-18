@@ -3,16 +3,37 @@ import { z } from 'zod';
 import type { OdooClient, OdooDomain } from '../odoo-client.js';
 
 const ORDER_FIELDS = [
-  'id', 'name', 'partner_id', 'user_id', 'team_id',
-  'state', 'date_order', 'validity_date', 'commitment_date',
-  'amount_untaxed', 'amount_tax', 'amount_total',
-  'currency_id', 'company_id', 'note',
-  'order_line', 'invoice_status', 'create_date', 'write_date',
+  'id',
+  'name',
+  'partner_id',
+  'user_id',
+  'team_id',
+  'state',
+  'date_order',
+  'validity_date',
+  'commitment_date',
+  'amount_untaxed',
+  'amount_tax',
+  'amount_total',
+  'currency_id',
+  'company_id',
+  'note',
+  'order_line',
+  'invoice_status',
+  'create_date',
+  'write_date',
 ];
 
 const ORDER_LINE_FIELDS = [
-  'id', 'product_id', 'name', 'product_uom_qty', 'price_unit',
-  'price_subtotal', 'price_total', 'tax_id', 'discount',
+  'id',
+  'product_id',
+  'name',
+  'product_uom_qty',
+  'price_unit',
+  'price_subtotal',
+  'price_total',
+  'tax_id',
+  'discount',
 ];
 
 export function registerSalesTools(server: McpServer, client: OdooClient): void {
@@ -20,8 +41,12 @@ export function registerSalesTools(server: McpServer, client: OdooClient): void 
     'odoo_sales_list_orders',
     'List sales orders or quotations',
     {
-      state: z.enum(['draft', 'sent', 'sale', 'done', 'cancel']).optional()
-        .describe('draft=quotation, sent=sent quotation, sale=confirmed order, done=locked, cancel=cancelled'),
+      state: z
+        .enum(['draft', 'sent', 'sale', 'done', 'cancel'])
+        .optional()
+        .describe(
+          'draft=quotation, sent=sent quotation, sale=confirmed order, done=locked, cancel=cancelled'
+        ),
       customer: z.string().optional().describe('Filter by customer name (partial match)'),
       limit: z.number().optional().default(20),
       offset: z.number().optional().default(0),
@@ -108,16 +133,10 @@ export function registerSalesTools(server: McpServer, client: OdooClient): void 
           const domain: OdooDomain = [['state', '=', key]];
           const count = await client.searchCount('sale.order', domain);
 
-          const orders = await client.searchRead(
-            'sale.order',
-            domain,
-            ['amount_total'],
-            { limit: 1000 }
-          );
-          const total = orders.reduce(
-            (sum, o) => sum + ((o['amount_total'] as number) || 0),
-            0
-          );
+          const orders = await client.searchRead('sale.order', domain, ['amount_total'], {
+            limit: 1000,
+          });
+          const total = orders.reduce((sum, o) => sum + ((o['amount_total'] as number) || 0), 0);
 
           return { state: label, count, total_amount: total };
         })

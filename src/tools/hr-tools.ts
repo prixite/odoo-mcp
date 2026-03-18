@@ -3,17 +3,39 @@ import { z } from 'zod';
 import type { OdooClient, OdooDomain } from '../odoo-client.js';
 
 const EMPLOYEE_FIELDS = [
-  'id', 'name', 'job_id', 'job_title', 'department_id',
-  'parent_id', 'coach_id', 'work_email', 'work_phone', 'mobile_phone',
-  'active', 'company_id', 'resource_calendar_id',
-  'gender', 'birthday', 'country_id', 'marital',
-  'create_date', 'write_date',
+  'id',
+  'name',
+  'job_id',
+  'job_title',
+  'department_id',
+  'parent_id',
+  'coach_id',
+  'work_email',
+  'work_phone',
+  'mobile_phone',
+  'active',
+  'company_id',
+  'resource_calendar_id',
+  'gender',
+  'birthday',
+  'country_id',
+  'marital',
+  'create_date',
+  'write_date',
 ];
 
 const LEAVE_FIELDS = [
-  'id', 'name', 'employee_id', 'holiday_status_id',
-  'state', 'date_from', 'date_to', 'number_of_days',
-  'description', 'user_id', 'department_id',
+  'id',
+  'name',
+  'employee_id',
+  'holiday_status_id',
+  'state',
+  'date_from',
+  'date_to',
+  'number_of_days',
+  'description',
+  'user_id',
+  'department_id',
 ];
 
 export function registerHrTools(server: McpServer, client: OdooClient): void {
@@ -63,7 +85,8 @@ export function registerHrTools(server: McpServer, client: OdooClient): void {
     },
     async ({ query }) => {
       const domain: OdooDomain = [
-        '|', '|',
+        '|',
+        '|',
         ['name', 'ilike', query],
         ['work_email', 'ilike', query],
         ['job_title', 'ilike', query],
@@ -85,7 +108,9 @@ export function registerHrTools(server: McpServer, client: OdooClient): void {
     'List leave/time-off requests',
     {
       employee: z.string().optional().describe('Filter by employee name (partial match)'),
-      state: z.enum(['draft', 'confirm', 'refuse', 'validate1', 'validate']).optional()
+      state: z
+        .enum(['draft', 'confirm', 'refuse', 'validate1', 'validate'])
+        .optional()
         .describe('draft=to submit, confirm=pending, validate=approved, refuse=refused'),
       date_from: z.string().optional().describe('Filter leaves from this date (YYYY-MM-DD)'),
       date_to: z.string().optional().describe('Filter leaves to this date (YYYY-MM-DD)'),
@@ -122,8 +147,17 @@ export function registerHrTools(server: McpServer, client: OdooClient): void {
       const allocations = await client.searchRead(
         'hr.leave.allocation',
         domain,
-        ['id', 'employee_id', 'holiday_status_id', 'number_of_days',
-         'number_of_days_display', 'remaining_leaves', 'state', 'date_from', 'date_to'],
+        [
+          'id',
+          'employee_id',
+          'holiday_status_id',
+          'number_of_days',
+          'number_of_days_display',
+          'remaining_leaves',
+          'state',
+          'date_from',
+          'date_to',
+        ],
         { limit: 100, order: 'employee_id asc' }
       );
 
@@ -133,21 +167,16 @@ export function registerHrTools(server: McpServer, client: OdooClient): void {
     }
   );
 
-  server.tool(
-    'odoo_hr_list_departments',
-    'List all departments',
-    {},
-    async () => {
-      const departments = await client.searchRead(
-        'hr.department',
-        [['active', '=', true]],
-        ['id', 'name', 'parent_id', 'manager_id', 'member_ids'],
-        { order: 'name asc', limit: 100 }
-      );
+  server.tool('odoo_hr_list_departments', 'List all departments', {}, async () => {
+    const departments = await client.searchRead(
+      'hr.department',
+      [['active', '=', true]],
+      ['id', 'name', 'parent_id', 'manager_id', 'member_ids'],
+      { order: 'name asc', limit: 100 }
+    );
 
-      return {
-        content: [{ type: 'text', text: JSON.stringify(departments, null, 2) }],
-      };
-    }
-  );
+    return {
+      content: [{ type: 'text', text: JSON.stringify(departments, null, 2) }],
+    };
+  });
 }

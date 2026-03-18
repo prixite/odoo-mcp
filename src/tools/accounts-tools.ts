@@ -3,29 +3,45 @@ import { z } from 'zod';
 import type { OdooClient, OdooDomain } from '../odoo-client.js';
 
 const INVOICE_FIELDS = [
-  'id', 'name', 'move_type', 'partner_id', 'invoice_date', 'invoice_date_due',
-  'state', 'payment_state', 'amount_untaxed', 'amount_tax', 'amount_total',
-  'amount_residual', 'currency_id', 'invoice_user_id', 'journal_id',
-  'narration', 'ref', 'company_id', 'create_date', 'write_date',
+  'id',
+  'name',
+  'move_type',
+  'partner_id',
+  'invoice_date',
+  'invoice_date_due',
+  'state',
+  'payment_state',
+  'amount_untaxed',
+  'amount_tax',
+  'amount_total',
+  'amount_residual',
+  'currency_id',
+  'invoice_user_id',
+  'journal_id',
+  'narration',
+  'ref',
+  'company_id',
+  'create_date',
+  'write_date',
 ];
 
-const MOVE_TYPE_MAP: Record<string, string> = {
-  out_invoice: 'Customer Invoice',
-  out_refund: 'Customer Credit Note',
-  in_invoice: 'Vendor Bill',
-  in_refund: 'Vendor Credit Note',
-};
 
 export function registerAccountsTools(server: McpServer, client: OdooClient): void {
   server.tool(
     'odoo_accounts_list_invoices',
     'List invoices or bills',
     {
-      type: z.enum(['out_invoice', 'out_refund', 'in_invoice', 'in_refund']).optional()
+      type: z
+        .enum(['out_invoice', 'out_refund', 'in_invoice', 'in_refund'])
+        .optional()
         .describe('out_invoice=customer invoice, in_invoice=vendor bill, out_refund=credit note'),
-      state: z.enum(['draft', 'posted', 'cancel']).optional()
+      state: z
+        .enum(['draft', 'posted', 'cancel'])
+        .optional()
         .describe('draft=draft, posted=confirmed/posted, cancel=cancelled'),
-      payment_state: z.enum(['not_paid', 'in_payment', 'paid', 'partial', 'reversed', 'invoicing_legacy']).optional()
+      payment_state: z
+        .enum(['not_paid', 'in_payment', 'paid', 'partial', 'reversed', 'invoicing_legacy'])
+        .optional()
         .describe('Payment status filter'),
       partner: z.string().optional().describe('Filter by partner/customer name (partial match)'),
       date_from: z.string().optional().describe('Invoice date from (YYYY-MM-DD)'),
@@ -36,7 +52,8 @@ export function registerAccountsTools(server: McpServer, client: OdooClient): vo
     async ({ type, state, payment_state, partner, date_from, date_to, limit, offset }) => {
       const domain: OdooDomain = [];
       if (type) domain.push(['move_type', '=', type]);
-      else domain.push(['move_type', 'in', ['out_invoice', 'out_refund', 'in_invoice', 'in_refund']]);
+      else
+        domain.push(['move_type', 'in', ['out_invoice', 'out_refund', 'in_invoice', 'in_refund']]);
 
       if (state) domain.push(['state', '=', state]);
       if (payment_state) domain.push(['payment_state', '=', payment_state]);
@@ -63,23 +80,34 @@ export function registerAccountsTools(server: McpServer, client: OdooClient): vo
       id: z.number().describe('Invoice/move ID'),
     },
     async ({ id }) => {
-      const invoices = await client.read('account.move', [id], [
-        ...INVOICE_FIELDS,
-        'invoice_line_ids', 'line_ids',
-      ]);
+      const invoices = await client.read(
+        'account.move',
+        [id],
+        [...INVOICE_FIELDS, 'invoice_line_ids', 'line_ids']
+      );
       if (!invoices.length) throw new Error(`Invoice ${id} not found`);
 
       const invoice = invoices[0];
       const lineIds = invoice['invoice_line_ids'] as number[];
       const lines = lineIds?.length
         ? await client.read('account.move.line', lineIds, [
-            'id', 'name', 'product_id', 'quantity', 'price_unit',
-            'price_subtotal', 'price_total', 'tax_ids', 'account_id', 'discount',
+            'id',
+            'name',
+            'product_id',
+            'quantity',
+            'price_unit',
+            'price_subtotal',
+            'price_total',
+            'tax_ids',
+            'account_id',
+            'discount',
           ])
         : [];
 
       return {
-        content: [{ type: 'text', text: JSON.stringify({ ...invoice, invoice_lines: lines }, null, 2) }],
+        content: [
+          { type: 'text', text: JSON.stringify({ ...invoice, invoice_lines: lines }, null, 2) },
+        ],
       };
     }
   );
@@ -108,7 +136,9 @@ export function registerAccountsTools(server: McpServer, client: OdooClient): vo
       );
 
       const overdue = invoices.filter(
-        (inv) => inv['invoice_date_due'] && (inv['invoice_date_due'] as string) < new Date().toISOString().split('T')[0]
+        (inv) =>
+          inv['invoice_date_due'] &&
+          (inv['invoice_date_due'] as string) < new Date().toISOString().split('T')[0]
       );
       const overdueTotal = overdue.reduce(
         (sum, inv) => sum + ((inv['amount_residual'] as number) || 0),
@@ -116,16 +146,22 @@ export function registerAccountsTools(server: McpServer, client: OdooClient): vo
       );
 
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            total_outstanding: total,
-            total_overdue: overdueTotal,
-            count: invoices.length,
-            overdue_count: overdue.length,
-            invoices,
-          }, null, 2),
-        }],
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                total_outstanding: total,
+                total_overdue: overdueTotal,
+                count: invoices.length,
+                overdue_count: overdue.length,
+                invoices,
+              },
+              null,
+              2
+            ),
+          },
+        ],
       };
     }
   );
@@ -148,16 +184,15 @@ export function registerAccountsTools(server: McpServer, client: OdooClient): vo
         { limit: 500, order: 'invoice_date_due asc' }
       );
 
-      const total = bills.reduce(
-        (sum, b) => sum + ((b['amount_residual'] as number) || 0),
-        0
-      );
+      const total = bills.reduce((sum, b) => sum + ((b['amount_residual'] as number) || 0), 0);
 
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({ total_outstanding: total, count: bills.length, bills }, null, 2),
-        }],
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ total_outstanding: total, count: bills.length, bills }, null, 2),
+          },
+        ],
       };
     }
   );
@@ -204,10 +239,12 @@ export function registerAccountsTools(server: McpServer, client: OdooClient): vo
       );
 
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({ year, total_revenue: totalRevenue, by_month: result }, null, 2),
-        }],
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ year, total_revenue: totalRevenue, by_month: result }, null, 2),
+          },
+        ],
       };
     }
   );
