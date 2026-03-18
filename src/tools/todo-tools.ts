@@ -61,8 +61,9 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
       description: z.string().optional().describe('Notes or details (HTML supported)'),
       date_deadline: z.string().optional().describe('Due date in YYYY-MM-DD format'),
       priority: z.enum(['0', '1']).optional().default('0').describe('"1" = starred, "0" = normal'),
+      user_ids: z.array(z.number()).optional().describe('User IDs to assign this to-do to'),
     },
-    async ({ name, description, date_deadline, priority }) => {
+    async ({ name, description, date_deadline, priority, user_ids }) => {
       const values: Record<string, OdooValue> = {
         name,
         project_id: false,
@@ -70,6 +71,7 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
       };
       if (description) values['description'] = description;
       if (date_deadline) values['date_deadline'] = date_deadline;
+      if (user_ids) values['user_ids'] = [[6, 0, user_ids]];
 
       const id = await client.create(TODO_MODEL, values);
       return { content: [{ type: 'text', text: `Created to-do with ID ${id}` }] };
@@ -85,13 +87,15 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
       description: z.string().optional().describe('New notes/details'),
       date_deadline: z.string().optional().describe('New due date in YYYY-MM-DD format'),
       priority: z.enum(['0', '1']).optional().describe('"1" = starred, "0" = normal'),
+      user_ids: z.array(z.number()).optional().describe('Replace assigned users with these user IDs'),
     },
-    async ({ id, name, description, date_deadline, priority }) => {
+    async ({ id, name, description, date_deadline, priority, user_ids }) => {
       const values: Record<string, OdooValue> = {};
       if (name !== undefined) values['name'] = name;
       if (description !== undefined) values['description'] = description;
       if (date_deadline !== undefined) values['date_deadline'] = date_deadline;
       if (priority !== undefined) values['priority'] = priority;
+      if (user_ids !== undefined) values['user_ids'] = [[6, 0, user_ids]];
 
       if (!Object.keys(values).length) throw new Error('No fields provided to update');
 
