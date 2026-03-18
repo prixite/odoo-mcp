@@ -25,7 +25,6 @@ const INVOICE_FIELDS = [
   'write_date',
 ];
 
-
 export function registerAccountsTools(server: McpServer, client: OdooClient): void {
   server.tool(
     'odoo_accounts_list_invoices',
