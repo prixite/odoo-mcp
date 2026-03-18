@@ -39,7 +39,7 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
     },
     async ({ state, priority, limit, offset }) => {
       const domain = todoDomain([['active', '=', true]]);
-      if (state) domain.push(['state', '=', state]);
+      if (state) domain.push(['state', '=', state === 'done' ? '1_done' : '01_in_progress']);
       if (priority) domain.push(['priority', '=', priority]);
 
       const todos = await client.searchRead(TODO_MODEL, domain, TODO_FIELDS, {
@@ -127,7 +127,7 @@ export function registerTodoTools(server: McpServer, client: OdooClient): void {
       done: z.boolean().default(true).describe('true = mark done, false = reopen'),
     },
     async ({ id, done }) => {
-      await client.write(TODO_MODEL, [id], { state: done ? 'done' : 'open' });
+      await client.write(TODO_MODEL, [id], { state: done ? '1_done' : '01_in_progress' });
       return {
         content: [{ type: 'text', text: `To-do ${id} marked as ${done ? 'done' : 'open'}` }],
       };
