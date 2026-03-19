@@ -130,9 +130,20 @@ export function registerGenericTools(server: McpServer, client: OdooClient): voi
       values: z.record(z.any()).describe('Field values to set, e.g. {"name": "John Doe"}'),
     },
     async ({ model, ids, values }) => {
-      const ok = await client.write(model, ids, values as Record<string, import('../odoo-client.js').OdooValue>);
+      const ok = await client.write(
+        model,
+        ids,
+        values as Record<string, import('../odoo-client.js').OdooValue>
+      );
       return {
-        content: [{ type: 'text', text: ok ? `Updated ${ids.length} record(s) in ${model}.` : 'Write returned false — check field values.' }],
+        content: [
+          {
+            type: 'text',
+            text: ok
+              ? `Updated ${ids.length} record(s) in ${model}.`
+              : 'Write returned false — check field values.',
+          },
+        ],
       };
     }
   );
@@ -145,7 +156,10 @@ export function registerGenericTools(server: McpServer, client: OdooClient): voi
       values: z.record(z.any()).describe('Field values for the new record'),
     },
     async ({ model, values }) => {
-      const id = await client.create(model, values as Record<string, import('../odoo-client.js').OdooValue>);
+      const id = await client.create(
+        model,
+        values as Record<string, import('../odoo-client.js').OdooValue>
+      );
       return {
         content: [{ type: 'text', text: `Created record with ID ${id} in ${model}.` }],
       };
