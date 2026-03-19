@@ -10,7 +10,7 @@ An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server for [O
 - **Accounts** — invoices, accounts receivable/payable summaries, revenue reports
 - **Payroll** — payslips, payroll batches, salary summaries
 - **To-do** — list, create, update, and complete personal to-do tasks
-- **Generic** — `search_read` and `get_record` for any Odoo model
+- **Generic** — `search_read`, `get_record`, `write`, and `create` for any Odoo model
 
 ## Tools
 
@@ -74,6 +74,8 @@ An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server for [O
 | `odoo_get_record` | Get a specific record by model and ID |
 | `odoo_fields_get` | Get field definitions for any Odoo model |
 | `odoo_list_partners` | List contacts/partners with optional filters |
+| `odoo_write` | Update one or more records by ID on any model |
+| `odoo_create` | Create a new record on any model |
 
 ## Setup
 

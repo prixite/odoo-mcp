@@ -120,4 +120,35 @@ export function registerGenericTools(server: McpServer, client: OdooClient): voi
       };
     }
   );
+
+  server.tool(
+    'odoo_write',
+    'Update one or more Odoo records by ID. Works on any model. Use odoo_fields_get to discover writable fields.',
+    {
+      model: z.string().describe('Odoo model name, e.g. "hr.employee", "res.partner"'),
+      ids: z.array(z.number()).describe('Record IDs to update'),
+      values: z.record(z.any()).describe('Field values to set, e.g. {"name": "John Doe"}'),
+    },
+    async ({ model, ids, values }) => {
+      const ok = await client.write(model, ids, values as Record<string, import('../odoo-client.js').OdooValue>);
+      return {
+        content: [{ type: 'text', text: ok ? `Updated ${ids.length} record(s) in ${model}.` : 'Write returned false — check field values.' }],
+      };
+    }
+  );
+
+  server.tool(
+    'odoo_create',
+    'Create a new record in any Odoo model. Use odoo_fields_get to discover required fields.',
+    {
+      model: z.string().describe('Odoo model name, e.g. "hr.employee", "crm.lead"'),
+      values: z.record(z.any()).describe('Field values for the new record'),
+    },
+    async ({ model, values }) => {
+      const id = await client.create(model, values as Record<string, import('../odoo-client.js').OdooValue>);
+      return {
+        content: [{ type: 'text', text: `Created record with ID ${id} in ${model}.` }],
+      };
+    }
+  );
 }
