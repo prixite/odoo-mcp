@@ -11,7 +11,6 @@ const CRM_LEAD_FIELDS = [
   'team_id',
   'probability',
   'expected_revenue',
-  'planned_revenue',
   'priority',
   'tag_ids',
   'description',
@@ -110,7 +109,7 @@ export function registerCrmTools(server: McpServer, client: OdooClient): void {
       const stages = await client.searchRead(
         'crm.stage',
         [],
-        ['id', 'name', 'sequence', 'probability'],
+        ['id', 'name', 'sequence', 'is_won'],
         { order: 'sequence asc', limit: 50 }
       );
 
